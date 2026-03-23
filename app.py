@@ -21,18 +21,18 @@ custom_css = """
 * { font-family: 'Space Grotesk', sans-serif; box-sizing: border-box; }
 body, .gradio-container { background: #080c14 !important; }
 #title-area {
-    text-align: center; padding: 28px 20px 20px;
+    text-align: center; padding: 14px 20px 12px;
     background: linear-gradient(135deg, #0a0f1e 0%, #0d1f3c 50%, #0a0f1e 100%);
-    border-radius: 16px; margin-bottom: 14px;
+    border-radius: 12px; margin-bottom: 10px;
     border: 1px solid rgba(0,180,255,0.15);
 }
-#title-area h1 { color: #fff; font-size: 2.8em; margin: 0; letter-spacing: 8px; font-weight: 700; text-shadow: 0 0 30px rgba(0,180,255,0.4); }
+#title-area h1 { color: #fff; font-size: 1.9em; margin: 0; letter-spacing: 6px; font-weight: 700; text-shadow: 0 0 20px rgba(0,180,255,0.4); }
 #title-area h1 span { color: #00b4ff; }
-#title-area p { color: #4a6fa5; margin: 6px 0 0; font-size: 0.78em; letter-spacing: 3px; text-transform: uppercase; }
+#title-area p { color: #4a6fa5; margin: 3px 0 0; font-size: 0.72em; letter-spacing: 2px; text-transform: uppercase; }
 .plus-banner {
     background: linear-gradient(90deg, #0a1628, #0d2040, #0a1628);
     border: 1px solid rgba(0,180,255,0.3); border-radius: 12px;
-    padding: 12px 20px; margin-bottom: 14px;
+    padding: 8px 16px; margin-bottom: 10px;
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
 }
 .plus-banner-text { color: #a8c4e0; font-size: 0.88em; }
@@ -41,13 +41,13 @@ body, .gradio-container { background: #080c14 !important; }
 .banner-input { background: #0d1117; border: 1px solid rgba(0,180,255,0.3); border-radius: 8px; padding: 7px 12px; color: #fff; font-size: 0.82em; width: 150px; outline: none; }
 .banner-activate-btn { background: #00b4ff; color: #000; border: none; border-radius: 8px; padding: 7px 14px; font-weight: 600; cursor: pointer; font-size: 0.82em; }
 .banner-getplus-btn { background: transparent; color: #00b4ff; border: 1px solid #00b4ff; border-radius: 8px; padding: 7px 14px; font-weight: 600; font-size: 0.82em; text-decoration: none; }
-.streak-bar { background: #0a0f1e; border: 1px solid #161f30; border-radius: 12px; padding: 10px 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.streak-bar { background: #0a0f1e; border: 1px solid #161f30; border-radius: 12px; padding: 7px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .streak-item { display: flex; align-items: center; gap: 8px; color: #4a6fa5; font-size: 0.82em; }
 .streak-num { color: #00b4ff; font-weight: 700; font-size: 1.15em; }
 .goal-bar-bg { background: #161f30; border-radius: 20px; height: 6px; width: 100px; overflow: hidden; }
 .goal-bar-fill { background: linear-gradient(90deg, #00b4ff, #0066cc); height: 100%; border-radius: 20px; transition: width 0.5s ease; }
-.history-sidebar { background: #0a0f1e; border-radius: 14px; padding: 14px; border: 1px solid #161f30; }
-.settings-sidebar { background: #0a0f1e; border-radius: 14px; padding: 16px; border: 1px solid #161f30; }
+.history-sidebar { background: #0a0f1e; border-radius: 12px; padding: 10px; border: 1px solid #161f30; }
+.settings-sidebar { background: #0a0f1e; border-radius: 12px; padding: 12px; border: 1px solid #161f30; }
 .chatbot-container { border-radius: 14px !important; border: 1px solid #161f30 !important; background: #0a0f1e !important; }
 #input-row { margin-top: 10px; }
 #tools-row { margin-top: 8px; }
@@ -397,7 +397,7 @@ with gr.Blocks() as demo:
 
         with gr.Column(scale=3):
             chatbot = gr.Chatbot(
-                value=[intro_msg], height=430,
+                value=[intro_msg], height=380,
                 elem_classes="chatbot-container", show_label=False,
                 latex_delimiters=[{"left":"$$","right":"$$","display":True},{"left":"$","right":"$","display":False}]
             )
