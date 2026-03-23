@@ -1,5 +1,6 @@
 gradio
 huggingface_hub
-youtube-transcript-api
 fpdf2
 stripe
+uvicorn
+fastapi
