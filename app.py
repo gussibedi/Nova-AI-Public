@@ -5,14 +5,16 @@ import json
 import uuid
 import re
 import datetime
+import stripe
 import gradio as gr
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(token=os.environ.get("HF_TOKEN"))
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+RENDER_URL = "https://nova-ai-public.onrender.com"
 PLUS_CODES = set(os.environ.get("NOVA_PLUS_CODES", "NOVA-PLUS-DEMO").split(","))
 CHAT_STORE_FILE = "/tmp/nova_chats.json"
 MSG_LIMIT_FREE = 20
-STRIPE_PRICE_ID = "price_1TE1YZCgnQ2d4ekmJVFiLfaE"
 
 custom_css = """
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
@@ -310,6 +312,19 @@ def generate_exit_ticket(history):
     except Exception as e: return f"Error: {str(e)}"
 
 
+def create_checkout_session():
+    try:
+        session = stripe.checkout.Session.create(
+            line_items=[{"price": STRIPE_PRICE_ID, "quantity": 1}],
+            mode="subscription",
+            success_url=f"{RENDER_URL}/?success=true",
+            cancel_url=f"{RENDER_URL}/?canceled=true",
+        )
+        return session.url
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+
 # ── UI ────────────────────────────────────────────────────────────────────────
 
 with gr.Blocks() as demo:
@@ -328,7 +343,7 @@ with gr.Blocks() as demo:
         <div class='plus-banner-actions'>
             <input class='banner-input' id='banner-code-input' type='password' placeholder='Enter Plus code...' />
             <button class='banner-activate-btn' onclick='(function(){var code=document.getElementById("banner-code-input").value;var tb=document.querySelector("#plus-code-box textarea");if(tb){tb.value=code;tb.dispatchEvent(new Event("input",{bubbles:true}));}setTimeout(function(){document.getElementById("plus-activate-trigger").click();},100);})()'>Activate</button>
-            <a class='banner-getplus-btn' href='https://ko-fi.com/guranshb' target='_blank'>Get Plus $4/mo →</a>
+            <button class='banner-getplus-btn' id='stripe-banner-btn' onclick='(function(){document.getElementById("stripe-banner-btn").innerText="Loading...";fetch("/stripe_url").then(r=>r.json()).then(d=>{if(d.url){window.open(d.url,"_blank");}document.getElementById("stripe-banner-btn").innerText="Get Plus $4/mo";}).catch(()=>{window.open("https://ko-fi.com/guranshb","_blank");document.getElementById("stripe-banner-btn").innerText="Get Plus $4/mo";})})()'>Get Plus $4/mo →</button>
         </div>
     </div>""")
 
@@ -347,7 +362,7 @@ with gr.Blocks() as demo:
           <div>✅ Priority AI responses</div>
         </div>
         <p class='price'>Only <span class='amount'>$4</span><span style='color:#4a6fa5;font-size:0.7em;'>/month</span></p>
-        <a class='kofi-btn' href='https://ko-fi.com/guranshb' target='_blank'>Get Nova Plus on Ko-fi</a>
+        <button class='kofi-btn' id='stripe-modal-btn' onclick='(function(){document.getElementById("stripe-modal-btn").innerText="Loading...";fetch("/stripe_url").then(r=>r.json()).then(d=>{if(d.url){window.open(d.url,"_blank");}document.getElementById("stripe-modal-btn").innerText="Get Nova Plus";}).catch(()=>{window.open("https://ko-fi.com/guranshb","_blank");document.getElementById("stripe-modal-btn").innerText="Get Nova Plus";})})()'>Get Nova Plus — $4/month</button>
         <p style='color:#4a6fa5;font-size:0.78em;'>After paying you will receive a code within 24 hours.</p>
         <div class='code-section'>
           <p>Already have a code?</p>
@@ -523,4 +538,24 @@ with gr.Blocks() as demo:
     pdf_btn.click(pdf_fn_gated,       [chatbot, plus_state], [pdf_download, tool_output])
     cleanup_btn.click(cleanup_fn,     [notes], [notes, tool_output])
 
-demo.launch(css=custom_css)
+# Mount Stripe checkout route
+try:
+    from fastapi import FastAPI
+    from fastapi.responses import JSONResponse
+    import uvicorn
+
+    app_fastapi = FastAPI()
+
+    @app_fastapi.get("/stripe_url")
+    def stripe_url_route():
+        url = create_checkout_session()
+        if url.startswith("Error"):
+            return JSONResponse({"url": None, "error": url})
+        return JSONResponse({"url": url})
+
+    import gradio as gr
+    demo_app = gr.mount_gradio_app(app_fastapi, demo, path="/")
+    uvicorn.run(demo_app, host="0.0.0.0", port=7860)
+except Exception:
+    # Fallback to normal launch if FastAPI not available
+    demo.launch(css=custom_css)
